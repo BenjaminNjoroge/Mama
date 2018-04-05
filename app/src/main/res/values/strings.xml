@@ -1,0 +1,77 @@
+<resources>
+    <string name="app_name">Mama</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="scan_barcode">Scan Barcode</string>
+    <string name="custom_options">Custom Options</string>
+    <string name="scan_from_fragment">Scan from fragment</string>
+    <string name="finish">FINISH</string>
+    <string name="church_message">Together we can save lives . Thankyou for joining us</string>
+    <string name="action_logout">Logout</string>
+
+    <string name="action_sign_in_short">Register</string>
+    <string name="email">Email</string>
+    <string name="minimum_password">Password too short, enter minimum 6 characters!</string>
+    <string name="auth_failed">Authentication failed, check your email and password or sign up</string>
+    <string name="change_email">Change Email</string>
+    <string name="change_password">Change Password</string>
+    <string name="send_password_reset_email">Send Password reset email</string>
+    <string name="remove_user">Remove user</string>
+    <string name="new_pass">New Password</string>
+    <string name="title_activity_profile">Firebase</string>
+    <string name="title_activity_login">Sign in</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_password">Password</string>
+    <string name="hint_name">Fullname</string>
+    <string name="btn_login">LOGIN</string>
+    <string name="btn_link_to_register">Not a member? Register and become a CHW now!</string>
+    <string name="btn_link_to_login">Already registered. Login Me!</string>
+    <string name="title_activity_reset_password">ResetPasswordActivity</string>
+    <string name="btn_forgot_password">Forgot your password?</string>
+    <string name="btn_reset_password">Reset Password</string>
+    <string name="btn_back"><![CDATA[<< Back]]></string>
+    <string name="hint_new_email">New Email</string>
+    <string name="btn_change">Change</string>
+    <string name="btn_send">Send</string>
+    <string name="btn_remove">Remove</string>
+    <string name="btn_sign_out">Sign Out</string>
+    <string name="lbl_forgot_password">Forgot password?</string>
+    <string name="forgot_password_msg">We just need your registered Email Id to sent you password reset instructions.</string>
+    <string name="prompt_password">Password</string>
+    <string name="title_activity_main2">Main2Activity</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+
+    <string name="app_intro_skip">Skip</string>
+
+    <string name="title_activity_welcome">Home Screen</string>
+    <string name="next">NEXT</string>
+    <string name="skip">SKIP</string>
+    <string name="start">Start Now</string>
+    <string name="slide_1_title">Just Here!</string>
+    <string name="slide_1_desc">The easiest way to keep in touch with your Friends!</string>
+    <string name="slide_2_title">Lots of Sticker</string>
+    <string name="slide_2_desc">Sticker is best way then long text!</string>
+    <string name="slide_3_title">Group Discussion</string>
+    <string name="slide_3_desc">Make group of best buddies and have fun!</string>
+    <string name="home_title">Welcome to Application</string>
+    <string name="home_desc">make friends and have fun.</string>
+    <string name="bottomnav_title_0">Home</string>
+    <string name="bottomnav_title_1">Maps</string>
+    <string name="tab_1">Home</string>
+    <string name="tab_2">Maps</string>
+    <string name="tab_3">Notifications</string>
+    <string name="bottomnav_title_2">Notifications</string>
+    <string name="saving_mothers_n_and_n_newborns">SAVING MOTHERS AND NEWBORNS</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="action_refactor">Refactor</string>
+    <string name="or">or login with</string>
+    <string name="facebook_app_id">331865194003551</string>
+    <string name="fb_login_protocol_scheme">fb331865194003551</string>
+    <string name="title_activity_user_profile">UserProfile</string>
+    <string name="quotedesc">Welcome! Where should we deliver to?</string>
+</resources>
