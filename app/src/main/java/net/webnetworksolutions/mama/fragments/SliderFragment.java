@@ -174,11 +174,10 @@ public class SliderFragment extends Fragment implements
     private void prepareCounties() {
         int[] covers = new int[]{
                 R.drawable.nairobi,
-                R.drawable.mombasa,
-                R.drawable.mother,
+                R.drawable.nakuru,
+                R.drawable.kiambu,
                 R.drawable.mombasa,
 
-                /**
                 R.drawable.kisumu,
                 R.drawable.bomet,
                 R.drawable.bungoma,
@@ -232,7 +231,7 @@ public class SliderFragment extends Fragment implements
                 R.drawable.vihiga,
                 R.drawable.wajir,
                 R.drawable.west_pokot,
-                 */
+
         };
 
         Counties a = new Counties("Nairobi County", " Level 5", covers[0]);
@@ -246,7 +245,7 @@ public class SliderFragment extends Fragment implements
 
         a = new Counties("Mombasa County", " Level 5", covers[3]);
         countiesList.add(a);
-/**
+
         a = new Counties("Kisumu County", " Level 5", covers[4]);
         countiesList.add(a);
 
@@ -376,7 +375,7 @@ public class SliderFragment extends Fragment implements
        a = new Counties("West Pokot County", " Level 5", covers[46]);
        countiesList.add(a);
 
-*/
+
 
         adapter.notifyDataSetChanged();
     }
@@ -390,7 +389,7 @@ public class SliderFragment extends Fragment implements
         private int spacing;
         private boolean includeEdge;
 
-        public GridSpacingItemDecoration(int spanCount, int spacing, boolean includeEdge) {
+        private GridSpacingItemDecoration(int spanCount, int spacing, boolean includeEdge) {
             this.spanCount = spanCount;
             this.spacing = spacing;
             this.includeEdge = includeEdge;
@@ -424,7 +423,7 @@ public class SliderFragment extends Fragment implements
      */
     private int dpToPx(int dp) {
         Resources r = getResources();
-        return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, r.getDisplayMetrics()));
+        return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, r.getDisplayMetrics()));
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -541,7 +540,7 @@ public class SliderFragment extends Fragment implements
 
     }
 
-    @Override
+   * @Override
     public void onResume() {
         super.onResume();
 
