@@ -14,6 +14,7 @@ import android.graphics.Rect;
 import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -57,9 +58,8 @@ import net.webnetworksolutions.mama.support.LocationsDB;
 
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
 
 public class SliderFragment extends Fragment implements
         GoogleApiClient.ConnectionCallbacks,
@@ -83,10 +83,6 @@ public class SliderFragment extends Fragment implements
 
     private View rootView;
 
-    private static final String LOG_TAG = "SliderFragment";
-
-
-    final private int REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 124;
 
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
@@ -94,7 +90,9 @@ public class SliderFragment extends Fragment implements
     private Location lastLocation;
     private Marker currentLocationMarker;
     private static final int GOOGLE_API_CLIENT_ID = 0;
-    private static final int PERMISSION_REQUEST_LOCATON_CODE = 100;
+    private static final int PERMISSION_REQUEST_LOCATON_CODE = 99;
+    double latitude, longitude;
+    double end_latitude, end_longitude;
 
     public SliderFragment() {
         //Required empty constructor
@@ -116,16 +114,16 @@ public class SliderFragment extends Fragment implements
         // Inflate the layout for this fragment
         rootView = inflater.inflate(R.layout.fragment_slider, container, false);
 
-        // Getting Google Play availability status
-        int status = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getActivity().getBaseContext());
-
-        // Showing status
-        if(status!=ConnectionResult.SUCCESS) { // Google Play Services are not available
-
-            int requestCode = 10;
-            Dialog dialog = GoogleApiAvailability.getInstance().getErrorDialog(getActivity(), status, requestCode);
-            dialog.show();
-        } else {
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            checkLocationPermission();
+        }
+        //Check if Google Play Services Available or not
+        if (!CheckGooglePlayServices()) {
+            Log.d("onCreate", "Finishing test case since Google Play Services are not available");
+            getActivity().finish();
+        }
+        else {
+            Log.d("onCreate","Google Play Services available.");
             if (mapFragment == null) {
                 mapFragment = SupportMapFragment.newInstance();
                 mapFragment.getMapAsync(new OnMapReadyCallback() {
@@ -133,11 +131,16 @@ public class SliderFragment extends Fragment implements
                     public void onMapReady(GoogleMap googleMap) {
                         mMap = googleMap;
                         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-                        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ) {
+                        if (Build.VERSION.SDK_INT>= Build.VERSION_CODES.M){
+                            if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
+                                    == PackageManager.PERMISSION_GRANTED ) {
+                                buildGoogleApiClient();
+                                mMap.setMyLocationEnabled(true);
+                            }
+                        } else {
                             buildGoogleApiClient();
                             mMap.setMyLocationEnabled(true);
                         }
-
                     }
                 });
                 // R.id.map is a FrameLayout, not a Fragment
@@ -147,10 +150,23 @@ public class SliderFragment extends Fragment implements
             getActivity().getSupportLoaderManager().initLoader(0, null, this);
         }
 
-        insertDummyContactWrapper();
 
         return rootView;
     }
+
+    private boolean CheckGooglePlayServices() {
+        GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
+        int result = googleAPI.isGooglePlayServicesAvailable(getActivity());
+        if(result != ConnectionResult.SUCCESS) {
+            if(googleAPI.isUserResolvableError(result)) {
+                googleAPI.getErrorDialog(getActivity(), result,
+                        0).show();
+            }
+            return false;
+        }
+        return true;
+    }
+
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -169,16 +185,18 @@ public class SliderFragment extends Fragment implements
         recyclerView.setAdapter(adapter);
 
         prepareCounties();
+
     }
 
     private void prepareCounties() {
         int[] covers = new int[]{
                 R.drawable.nairobi,
-                R.drawable.nakuru,
-                R.drawable.kiambu,
                 R.drawable.mombasa,
-
+                R.drawable.nakuru,
                 R.drawable.kisumu,
+
+
+                R.drawable.kiambu,
                 R.drawable.bomet,
                 R.drawable.bungoma,
                 R.drawable.busia,
@@ -237,16 +255,16 @@ public class SliderFragment extends Fragment implements
         Counties a = new Counties("Nairobi County", " Level 5", covers[0]);
         countiesList.add(a);
 
-        a = new Counties("Nakuru County", " Level 5", covers[1]);
+        a = new Counties("Mombasa County", " Level 5", covers[1]);
         countiesList.add(a);
 
-        a = new Counties("Kiambu County", " Level 5", covers[2]);
+        a = new Counties("Nakuru County", " Level 5", covers[2]);
         countiesList.add(a);
 
-        a = new Counties("Mombasa County", " Level 5", covers[3]);
+        a = new Counties("Kisumu County", " Level 5", covers[3]);
         countiesList.add(a);
 
-        a = new Counties("Kisumu County", " Level 5", covers[4]);
+        a = new Counties("Kiambu County", " Level 5", covers[4]);
         countiesList.add(a);
 
         a = new Counties("Bomet County", " Level 5", covers[5]);
@@ -258,7 +276,7 @@ public class SliderFragment extends Fragment implements
         a = new Counties("Busia County", " Level 5", covers[7]);
         countiesList.add(a);
 
-        a = new Counties("Elgeyo Marakwet County", " Level 5", covers[8]);
+        a = new Counties("Elgeyo M County", " Level 5", covers[8]);
         countiesList.add(a);
 
         a = new Counties("Embu County", " Level 5", covers[9]);
@@ -389,7 +407,7 @@ public class SliderFragment extends Fragment implements
         private int spacing;
         private boolean includeEdge;
 
-        private GridSpacingItemDecoration(int spanCount, int spacing, boolean includeEdge) {
+        public GridSpacingItemDecoration(int spanCount, int spacing, boolean includeEdge) {
             this.spanCount = spanCount;
             this.spacing = spacing;
             this.includeEdge = includeEdge;
@@ -423,7 +441,7 @@ public class SliderFragment extends Fragment implements
      */
     private int dpToPx(int dp) {
         Resources r = getResources();
-        return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, r.getDisplayMetrics()));
+        return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, r.getDisplayMetrics()));
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -435,104 +453,6 @@ public class SliderFragment extends Fragment implements
         mGoogleApiClient.connect();
     }
 
-    private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener) {
-        new AlertDialog.Builder(getActivity())
-                .setMessage(message)
-                .setPositiveButton("OK", okListener)
-                .setNegativeButton("Cancel", null)
-                .create()
-                .show();
-    }
-
-    private void insertDummyContactWrapper() {
-        List<String> permissionsNeeded = new ArrayList<String>();
-
-        final List<String> permissionsList = new ArrayList<String>();
-        if (!addPermission(permissionsList, Manifest.permission.ACCESS_FINE_LOCATION))
-            permissionsNeeded.add("GPS");
-        if (!addPermission(permissionsList, Manifest.permission.WRITE_EXTERNAL_STORAGE))
-            permissionsNeeded.add("Read Contacts");
-        if (!addPermission(permissionsList, Manifest.permission.CAMERA))
-            permissionsNeeded.add("Write Contacts");
-
-        if (permissionsList.size() > 0) {
-            if (permissionsNeeded.size() > 0) {
-                // Need Rationale
-                String message = "You need to grant access to " + permissionsNeeded.get(0);
-                for (int i = 1; i < permissionsNeeded.size(); i++)
-                    message = message + ", " + permissionsNeeded.get(i);
-                showMessageOKCancel(message,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                requestPermissions(permissionsList.toArray(new String[permissionsList.size()]),
-                                        REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS);
-                            }
-                        });
-                return;
-            }
-            requestPermissions(permissionsList.toArray(new String[permissionsList.size()]),
-                    REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS);
-            return;
-        }
-
-    }
-
-
-
-    private boolean addPermission(List<String> permissionsList, String permission) {
-        if (ContextCompat.checkSelfPermission(getActivity(), permission) != PackageManager.PERMISSION_GRANTED) {
-            permissionsList.add(permission);
-            // Check for Rationale Option
-            if (!shouldShowRequestPermissionRationale(permission))
-                return false;
-        }
-        return true;
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        switch (requestCode) {
-            case REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS: {
-                Map<String, Integer> perms = new HashMap<String, Integer>();
-                // Initial
-                perms.put(Manifest.permission.ACCESS_FINE_LOCATION, PackageManager.PERMISSION_GRANTED);
-                perms.put(Manifest.permission.WRITE_EXTERNAL_STORAGE, PackageManager.PERMISSION_GRANTED);
-                perms.put(Manifest.permission.CAMERA, PackageManager.PERMISSION_GRANTED);
-                // Fill with results
-                for (int i = 0; i < permissions.length; i++)
-                    perms.put(permissions[i], grantResults[i]);
-                // Check for ACCESS_FINE_LOCATION
-                if (perms.get(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                        && perms.get(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
-                        && perms.get(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-
-                    PackageManager packageManager = getActivity().getPackageManager();
-                    Intent intent = packageManager.getLaunchIntentForPackage(getActivity().getPackageName());
-                    ComponentName componentName = intent.getComponent();
-                    Intent mainIntent = Intent.makeRestartActivityTask(componentName);
-                    startActivity(mainIntent);
-                    System.exit(0);
-
-                    // All Permissions Granted
-                    if (mGoogleApiClient == null) {
-                        buildGoogleApiClient();
-                    }
-                    if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                        mMap.setMyLocationEnabled(true);
-                    }
-
-                } else {
-                    // Permission Denied
-                    Toast.makeText(getActivity(), "Some Permission is Denied", Toast.LENGTH_SHORT)
-                            .show();
-                }
-            }
-            break;
-            default:
-                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
-    }
 
   /**  @Override
     public void onDestroy() {
@@ -540,7 +460,7 @@ public class SliderFragment extends Fragment implements
 
     }
 
-   * @Override
+    @Override
     public void onResume() {
         super.onResume();
 
@@ -548,71 +468,65 @@ public class SliderFragment extends Fragment implements
 */
 
 
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-// Once connected with google api, get the location
-        locationRequest = new LocationRequest();
-        locationRequest.setInterval(1000);
-        locationRequest.setFastestInterval(1000);
-        locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+  @Override
+  public void onConnected(Bundle bundle) {
+      locationRequest = new LocationRequest();
+      locationRequest.setInterval(1000);
+      locationRequest.setFastestInterval(1000);
+      locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+      if (ContextCompat.checkSelfPermission(getActivity(),
+              Manifest.permission.ACCESS_FINE_LOCATION)
+              == PackageManager.PERMISSION_GRANTED) {
+          LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, this);
+      }
 
-        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, this);
-        }
+      mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
 
-        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+          @Override
+          public void onMapClick(LatLng point) {
 
-            @Override
-            public void onMapClick(LatLng point) {
+              // Drawing marker on the map
+              drawMarker(point);
 
+              // Creating an instance of ContentValues
+              ContentValues contentValues = new ContentValues();
 
-                // Drawing marker on the map
-                drawMarker(point);
+              // Setting latitude in ContentValues
+              contentValues.put(LocationsDB.FIELD_LAT, point.latitude );
 
-                // Creating an instance of ContentValues
-                ContentValues contentValues = new ContentValues();
+              // Setting longitude in ContentValues
+              contentValues.put(LocationsDB.FIELD_LNG, point.longitude);
 
-                // Setting latitude in ContentValues
-                contentValues.put(LocationsDB.FIELD_LAT, point.latitude );
+              // Setting zoom in ContentValues
+              contentValues.put(LocationsDB.FIELD_ZOOM, mMap.getCameraPosition().zoom);
 
-                // Setting longitude in ContentValues
-                contentValues.put(LocationsDB.FIELD_LNG, point.longitude);
+              // Creating an instance of LocationInsertTask
+              LocationInsertTask insertTask = new LocationInsertTask();
 
-                // Setting zoom in ContentValues
-                contentValues.put(LocationsDB.FIELD_ZOOM, mMap.getCameraPosition().zoom);
+              // Storing the latitude, longitude and zoom level to SQLite database
+              insertTask.execute(contentValues);
 
-                // Creating an instance of LocationInsertTask
-                LocationInsertTask insertTask = new LocationInsertTask();
+              Toast.makeText(getActivity().getBaseContext(), "Marker is added to the Map", Toast.LENGTH_SHORT).show();
+          }
+      });
 
-                // Storing the latitude, longitude and zoom level to SQLite database
-                insertTask.execute(contentValues);
+      mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+          @Override
+          public void onMapLongClick(LatLng point) {
 
-                Toast.makeText(getActivity().getBaseContext(), "Marker is added to the Map", Toast.LENGTH_SHORT).show();
+              // Removing all markers from the Google Map
+              mMap.clear();
 
-            }
-        });
+              // Creating an instance of LocationDeleteTask
+              LocationDeleteTask deleteTask = new LocationDeleteTask();
 
+              // Deleting all the rows from SQLite database table
+              deleteTask.execute();
 
-        mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
-            @Override
-            public void onMapLongClick(LatLng point) {
-
-                // Removing all markers from the Google Map
-                mMap.clear();
-
-                // Creating an instance of LocationDeleteTask
-                LocationDeleteTask deleteTask = new LocationDeleteTask();
-
-                // Deleting all the rows from SQLite database table
-                deleteTask.execute();
-
-                Toast.makeText(getActivity().getBaseContext(), "All markers are removed", Toast.LENGTH_LONG).show();
-
-            }
-        });
-
-
-    }
+              Toast.makeText(getActivity().getBaseContext(), "All markers are removed", Toast.LENGTH_LONG).show();
+          }
+      });
+  }
 
     @Override
     public void onConnectionSuspended(int i) {
@@ -627,55 +541,103 @@ public class SliderFragment extends Fragment implements
 
     @Override
     public void onLocationChanged(Location location) {
-        lastLocation= location;
-        if (currentLocationMarker != null){
+        Log.d("onLocationChanged", "entered");
+
+        lastLocation = location;
+        if (currentLocationMarker != null) {
             currentLocationMarker.remove();
         }
-        LatLng latLng= new LatLng(location.getLatitude(), location.getLongitude());
-        MarkerOptions markerOptions= new MarkerOptions();
-        markerOptions.position(latLng);
-        markerOptions.title("You're Here").visible(true);
-        markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_marker_my_location));
 
-       currentLocationMarker= mMap.addMarker(markerOptions);
-       mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-       mMap.animateCamera(CameraUpdateFactory.zoomBy(10));
+        latitude = location.getLatitude();
+        longitude = location.getLongitude();
 
-       if (mGoogleApiClient != null){
-           LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-       }
 
-    }
-
-    private void drawMarker(LatLng point){
-        // Creating an instance of MarkerOptions
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(latLng);
+        markerOptions.draggable(true);
+        markerOptions.title("Current Position");
+        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
+        currentLocationMarker = mMap.addMarker(markerOptions);
 
-        // Setting latitude and longitude for the marker
-        markerOptions.position(point);
+        //move map camera
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
 
-        // Adding marker on the Google Map
-        mMap.addMarker(markerOptions);
+
+        Toast.makeText(getActivity(),"Your Current Location", Toast.LENGTH_LONG).show();
+
+
+        //stop location updates
+        if (mGoogleApiClient != null) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+            Log.d("onLocationChanged", "Removing Location Updates");
+        }
+
     }
 
+    public boolean checkLocationPermission(){
+        if (ContextCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
 
-    private class LocationInsertTask extends AsyncTask<ContentValues, Void, Void>{
-        @Override
-        protected Void doInBackground(ContentValues... contentValues) {
+            // Asking user if explanation is needed
+            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+                    Manifest.permission.ACCESS_FINE_LOCATION)) {
 
-            /** Setting up values to insert the clicked location into SQLite database */
-            getActivity().getContentResolver().insert(LocationsContentProvider.CONTENT_URI, contentValues[0]);
-            return null;
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+
+                //Prompt the user once explanation has been shown
+                ActivityCompat.requestPermissions(getActivity(),
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        PERMISSION_REQUEST_LOCATON_CODE);
+
+
+            } else {
+                // No explanation needed, we can request the permission.
+                ActivityCompat.requestPermissions(getActivity(),
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        PERMISSION_REQUEST_LOCATON_CODE);
+            }
+            return false;
+        } else {
+            return true;
         }
     }
 
-    private class LocationDeleteTask extends AsyncTask<Void, Void, Void> {
-        @Override
-        protected Void doInBackground(Void... params) {
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_LOCATON_CODE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-            /** Deleting all the locations stored in SQLite database */
-            getActivity().getContentResolver().delete(LocationsContentProvider.CONTENT_URI, null, null);
-            return null;
+                    // permission was granted. Do the
+                    // contacts-related task you need to do.
+                    if (ContextCompat.checkSelfPermission(getActivity(),
+                            Manifest.permission.ACCESS_FINE_LOCATION)
+                            == PackageManager.PERMISSION_GRANTED) {
+
+                        if (mGoogleApiClient == null) {
+                            buildGoogleApiClient();
+                        }
+                        mMap.setMyLocationEnabled(true);
+                    }
+
+                } else {
+
+                    // Permission denied, Disable the functionality that depends on this permission.
+                    Toast.makeText(getActivity(), "permission denied", Toast.LENGTH_LONG).show();
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other permissions this app might request.
+            // You can add here other case statements according to your requirement.
         }
     }
 
@@ -688,9 +650,7 @@ public class SliderFragment extends Fragment implements
 
         // Fetches all the rows from locations table
         return new CursorLoader(getActivity(), uri, null, null, null, null);
-
     }
-
 
     @Override
     public void onLoadFinished(Loader<Cursor> arg0,
@@ -733,12 +693,42 @@ public class SliderFragment extends Fragment implements
 
             // Setting the zoom level in the map on last position  is clicked
             mMap.animateCamera(CameraUpdateFactory.zoomTo(zoom));
-
         }
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> arg0) {
         // TODO Auto-generated method stub
+    }
+
+    private void drawMarker(LatLng point){
+        // Creating an instance of MarkerOptions
+        MarkerOptions markerOptions = new MarkerOptions();
+
+        // Setting latitude and longitude for the marker
+        markerOptions.position(point);
+
+        // Adding marker on the Google Map
+        mMap.addMarker(markerOptions);
+    }
+
+    private class LocationInsertTask extends AsyncTask<ContentValues, Void, Void>{
+        @Override
+        protected Void doInBackground(ContentValues... contentValues) {
+
+            /** Setting up values to insert the clicked location into SQLite database */
+            getActivity().getContentResolver().insert(LocationsContentProvider.CONTENT_URI, contentValues[0]);
+            return null;
+        }
+    }
+
+    private class LocationDeleteTask extends AsyncTask<Void, Void, Void>{
+        @Override
+        protected Void doInBackground(Void... params) {
+
+            /** Deleting all the locations stored in SQLite database */
+            getActivity().getContentResolver().delete(LocationsContentProvider.CONTENT_URI, null, null);
+            return null;
+        }
     }
 }
