@@ -2,11 +2,7 @@ package net.webnetworksolutions.mama.fragments;
 
 
 import android.Manifest;
-import android.app.Dialog;
-import android.content.ComponentName;
 import android.content.ContentValues;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -24,7 +20,6 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -33,6 +28,7 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -52,6 +48,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import net.webnetworksolutions.mama.R;
 import net.webnetworksolutions.mama.adapters.CountiesAdapter;
+import net.webnetworksolutions.mama.maps.GetNearbyPlacesData;
 import net.webnetworksolutions.mama.pojo.Counties;
 import net.webnetworksolutions.mama.support.LocationsContentProvider;
 import net.webnetworksolutions.mama.support.LocationsDB;
@@ -65,6 +62,7 @@ public class SliderFragment extends Fragment implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener, LoaderManager.LoaderCallbacks<Cursor> {
+
 
     private SupportMapFragment mapFragment;
     private CountiesAdapter adapter;
@@ -91,8 +89,8 @@ public class SliderFragment extends Fragment implements
     private Marker currentLocationMarker;
     private static final int GOOGLE_API_CLIENT_ID = 0;
     private static final int PERMISSION_REQUEST_LOCATON_CODE = 99;
+    int PROXIMITY_RADIUS = 10000;
     double latitude, longitude;
-    double end_latitude, end_longitude;
 
     public SliderFragment() {
         //Required empty constructor
@@ -184,7 +182,56 @@ public class SliderFragment extends Fragment implements
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(adapter);
 
+        Button button= view.findViewById(R.id.buttonHospital);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Object dataTrasnsfer[]= new Object[2];
+                GetNearbyPlacesData getNearbyPlacesData= new GetNearbyPlacesData();
+
+                mMap.clear();
+               String hospital= "hospital";
+               String url= getUrl(latitude, longitude, hospital);
+
+                dataTrasnsfer[0]= mMap;
+                dataTrasnsfer[1]= url;
+
+                getNearbyPlacesData.execute(dataTrasnsfer);
+
+                Toast.makeText(getActivity(), "Showing nearby Hospitals", Toast.LENGTH_LONG).show();
+
+            }
+        });
+
+/*
+        // row click listener
+        recyclerView.addOnItemTouchListener(new RecyclerTouchListener(getActivity().getApplicationContext(), recyclerView, new RecyclerTouchListener.ClickListener() {
+            @Override
+            public void onClick(View view, int position) {
+                Counties counties = countiesList.get(position);
+                Toast.makeText(getActivity().getApplicationContext(), counties.getTitle() + " is selected!", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onLongClick(View view, int position) {
+
+            }
+        }));
+        */
+
         prepareCounties();
+
+    }
+
+    private String getUrl(double latitude, double longitude, String  nearbyPlace){
+        StringBuilder googlePlaceUrl= new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
+        googlePlaceUrl.append("location"+latitude+","+longitude);
+        googlePlaceUrl.append("&radius="+PROXIMITY_RADIUS);
+        googlePlaceUrl.append("&type="+nearbyPlace);
+        googlePlaceUrl.append("&sensor=true");
+        googlePlaceUrl.append("&key="+"AIzaSyCVa7wJ1We2tQeh1y11izEzvCKpbjSvvjQ");
+
+        return googlePlaceUrl.toString();
 
     }
 
@@ -452,20 +499,6 @@ public class SliderFragment extends Fragment implements
                 .build();
         mGoogleApiClient.connect();
     }
-
-
-  /**  @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-    }
-*/
 
 
   @Override

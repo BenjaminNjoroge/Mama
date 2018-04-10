@@ -31,17 +31,17 @@ public class CountiesAdapter extends RecyclerView.Adapter<CountiesAdapter.MyView
 
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-       View itemView= LayoutInflater.from(parent.getContext())
-               .inflate(R.layout.county_model,parent, false);
+        View itemView= LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.county_model,parent, false);
 
         return new MyViewHolder(itemView);
     }
 
     @Override
     public void onBindViewHolder(final MyViewHolder holder, int position) {
-       Counties counties= countiesList.get(position);
-       holder.title.setText(counties.getTitle());
-       holder.hospitals.setText(counties.getHospitals());
+        Counties counties= countiesList.get(position);
+        holder.title.setText(counties.getTitle());
+        holder.hospitals.setText(counties.getHospitals());
 
         // loading album cover using Glide library
         Glide.with(mContext).load(counties.getImg()).into(holder.countyImages);
