@@ -3,8 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Mama.iml" filepath="$PROJECT_DIR$/Mama.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/zxing-android-embedded/zxing-android-embedded.iml" filepath="$PROJECT_DIR$/zxing-android-embedded/zxing-android-embedded.iml" />
+      <module fileurl="file://$PROJECT_DIR$/collect_app/collect_app.iml" filepath="$PROJECT_DIR$/collect_app/collect_app.iml" />
     </modules>
   </component>
 </project>

@@ -3,6 +3,8 @@ package net.webnetworksolutions.mama.fragments;
 
 import android.Manifest;
 import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -29,6 +31,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -47,7 +50,10 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import net.webnetworksolutions.mama.R;
+import net.webnetworksolutions.mama.activity.NairobiCountyActivity;
 import net.webnetworksolutions.mama.adapters.CountiesAdapter;
+import net.webnetworksolutions.mama.helpers.ItemClickListener;
+import net.webnetworksolutions.mama.maps.GetDirectionsData;
 import net.webnetworksolutions.mama.maps.GetNearbyPlacesData;
 import net.webnetworksolutions.mama.pojo.Counties;
 import net.webnetworksolutions.mama.support.LocationsContentProvider;
@@ -61,7 +67,7 @@ import java.util.List;
 public class SliderFragment extends Fragment implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
-        LocationListener, LoaderManager.LoaderCallbacks<Cursor> {
+        LocationListener, LoaderManager.LoaderCallbacks<Cursor>{
 
 
     private SupportMapFragment mapFragment;
@@ -91,6 +97,7 @@ public class SliderFragment extends Fragment implements
     private static final int PERMISSION_REQUEST_LOCATON_CODE = 99;
     int PROXIMITY_RADIUS = 10000;
     double latitude, longitude;
+    double end_latitude, end_longitude;
 
     public SliderFragment() {
         //Required empty constructor
@@ -203,38 +210,45 @@ public class SliderFragment extends Fragment implements
             }
         });
 
-/*
-        // row click listener
-        recyclerView.addOnItemTouchListener(new RecyclerTouchListener(getActivity().getApplicationContext(), recyclerView, new RecyclerTouchListener.ClickListener() {
+        ImageView imageView= view.findViewById(R.id.distanceImage);
+        imageView.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view, int position) {
-                Counties counties = countiesList.get(position);
-                Toast.makeText(getActivity().getApplicationContext(), counties.getTitle() + " is selected!", Toast.LENGTH_SHORT).show();
-            }
+            public void onClick(View view) {
+                Object dataTrasnsfer[]= new Object[3];
 
-            @Override
-            public void onLongClick(View view, int position) {
-
+                String url = getDirectionsUrl();
+                GetDirectionsData getDirectionsData= new GetDirectionsData();
+                dataTrasnsfer[0]= mMap;
+                dataTrasnsfer[1]= url;
+                dataTrasnsfer[2]= new LatLng(end_latitude, end_longitude);
+                getDirectionsData.execute(dataTrasnsfer);
             }
-        }));
-        */
+        });
 
         prepareCounties();
 
     }
 
-    private String getUrl(double latitude, double longitude, String  nearbyPlace){
-        StringBuilder googlePlaceUrl= new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
-        googlePlaceUrl.append("location"+latitude+","+longitude);
-        googlePlaceUrl.append("&radius="+PROXIMITY_RADIUS);
-        googlePlaceUrl.append("&type="+nearbyPlace);
-        googlePlaceUrl.append("&sensor=true");
-        googlePlaceUrl.append("&key="+"AIzaSyCVa7wJ1We2tQeh1y11izEzvCKpbjSvvjQ");
+    private String getDirectionsUrl() {
+        StringBuilder googleDirectionsUrl = new StringBuilder("https://maps.googleapis.com/maps/api/directions/json?");
+        googleDirectionsUrl.append("origin="+latitude+","+longitude);
+        googleDirectionsUrl.append("&destination="+end_latitude+","+end_longitude);
+        googleDirectionsUrl.append("&key="+"AIzaSyDAxIAMLyfAhj0xQy2uh4gxX6AvVkdD_2c");
 
-        return googlePlaceUrl.toString();
-
+        return googleDirectionsUrl.toString();
     }
 
+
+    private String getUrl(double latitude, double longitude, String nearbyPlace) {
+        StringBuilder googlePlacesUrl = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
+        googlePlacesUrl.append("location=" + latitude + "," + longitude);
+        googlePlacesUrl.append("&radius=" + PROXIMITY_RADIUS);
+        googlePlacesUrl.append("&type=" + nearbyPlace);
+        googlePlacesUrl.append("&sensor=true");
+        googlePlacesUrl.append("&key=" + "AIzaSyCVa7wJ1We2tQeh1y11izEzvCKpbjSvvjQ");
+        Log.d("getUrl", googlePlacesUrl.toString());
+        return (googlePlacesUrl.toString());
+    }
     private void prepareCounties() {
         int[] covers = new int[]{
                 R.drawable.nairobi,
@@ -244,24 +258,25 @@ public class SliderFragment extends Fragment implements
 
 
                 R.drawable.kiambu,
+                R.drawable.baringo,
                 R.drawable.bomet,
                 R.drawable.bungoma,
-                R.drawable.busia,
 
+                R.drawable.busia,
                 R.drawable.elgeyo_marakwet,
                 R.drawable.embu,
+
                 R.drawable.garissa,
                 R.drawable.homabay,
-
                 R.drawable.isiolo,
                 R.drawable.kajiado,
+
                 R.drawable.kakamega,
                 R.drawable.kericho,
-
                 R.drawable.kilifi,
                 R.drawable.kirinyaga,
+
                 R.drawable.kisii,
-                R.drawable.baringo,
 
                 R.drawable.kitui,
                 R.drawable.kwale,
@@ -314,49 +329,49 @@ public class SliderFragment extends Fragment implements
         a = new Counties("Kiambu County", " Level 5", covers[4]);
         countiesList.add(a);
 
-        a = new Counties("Bomet County", " Level 5", covers[5]);
+        a = new Counties("Baringo County", " Level 5", covers[5]);
         countiesList.add(a);
 
-        a = new Counties("Bungoma County", " Level 5", covers[6]);
+        a = new Counties("Bomet County", " Level 5", covers[6]);
         countiesList.add(a);
 
-        a = new Counties("Busia County", " Level 5", covers[7]);
+        a = new Counties("Bungoma County", " Level 5", covers[7]);
         countiesList.add(a);
 
-        a = new Counties("Elgeyo M County", " Level 5", covers[8]);
+        a = new Counties("Busia County", " Level 5", covers[8]);
         countiesList.add(a);
 
-        a = new Counties("Embu County", " Level 5", covers[9]);
+        a = new Counties("Elgeyo M County", " Level 5", covers[9]);
         countiesList.add(a);
 
-        a = new Counties("Garissa County", " Level 5", covers[10]);
+        a = new Counties("Embu County", " Level 5", covers[10]);
         countiesList.add(a);
 
-        a = new Counties("Homa Bay County", " Level 5", covers[11]);
+        a = new Counties("Garissa County", " Level 5", covers[11]);
         countiesList.add(a);
 
-        a = new Counties("Isiolo County", " Level 5", covers[12]);
+        a = new Counties("Homa Bay County", " Level 5", covers[12]);
         countiesList.add(a);
 
-        a = new Counties("Kajiado County", " Level 5", covers[13]);
+        a = new Counties("Isiolo County", " Level 5", covers[13]);
         countiesList.add(a);
 
-        a = new Counties("Kakamega County", " Level 5", covers[14]);
+        a = new Counties("Kajiado County", " Level 5", covers[14]);
         countiesList.add(a);
 
-        a = new Counties("Kericho County", " Level 5", covers[15]);
+        a = new Counties("Kakamega County", " Level 5", covers[15]);
         countiesList.add(a);
 
-        a = new Counties("Kilifi County", " Level 5", covers[16]);
+        a = new Counties("Kericho County", " Level 5", covers[16]);
         countiesList.add(a);
 
-        a = new Counties("Kirinyaga County", " Level 5", covers[17]);
+        a = new Counties("Kilifi County", " Level 5", covers[17]);
         countiesList.add(a);
 
-        a = new Counties("Kisii County", " Level 5", covers[18]);
+        a = new Counties("Kirinyaga County", " Level 5", covers[18]);
         countiesList.add(a);
 
-        a = new Counties("Baringo County", " Level 5", covers[19]);
+        a = new Counties("Kisii County", " Level 5", covers[19]);
         countiesList.add(a);
 
         a = new Counties("Kitui County", " Level 5", covers[20]);
@@ -445,6 +460,7 @@ public class SliderFragment extends Fragment implements
         adapter.notifyDataSetChanged();
     }
 
+
     /**
      * RecyclerView item decoration - give equal margin around grid item
      */
@@ -528,7 +544,7 @@ public class SliderFragment extends Fragment implements
               contentValues.put(LocationsDB.FIELD_LAT, point.latitude );
 
               // Setting longitude in ContentValues
-              contentValues.put(LocationsDB.FIELD_LNG, point.longitude);
+             contentValues.put(LocationsDB.FIELD_LNG, point.longitude);
 
               // Setting zoom in ContentValues
               contentValues.put(LocationsDB.FIELD_ZOOM, mMap.getCameraPosition().zoom);
@@ -641,8 +657,7 @@ public class SliderFragment extends Fragment implements
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
             case PERMISSION_REQUEST_LOCATON_CODE: {
                 // If request is cancelled, the result arrays are empty.
@@ -675,8 +690,7 @@ public class SliderFragment extends Fragment implements
     }
 
     @Override
-    public Loader<Cursor> onCreateLoader(int arg0,
-                                         Bundle arg1) {
+    public Loader<Cursor> onCreateLoader(int arg0, Bundle arg1) {
 
         // Uri to the content provider LocationsContentProvider
         Uri uri = LocationsContentProvider.CONTENT_URI;
@@ -686,8 +700,7 @@ public class SliderFragment extends Fragment implements
     }
 
     @Override
-    public void onLoadFinished(Loader<Cursor> arg0,
-                               Cursor arg1) {
+    public void onLoadFinished(Loader<Cursor> arg0, Cursor arg1) {
         int locationCount = 0;
         double lat=0;
         double lng=0;
